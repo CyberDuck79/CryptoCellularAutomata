@@ -63,7 +63,7 @@ void proto_evolve(ull state, int *perm_tab, ull nb_gen)
 	{
 		st = state;
         for (i = N; i; i--)
-            putchar(st & B(i) ? '#' : ' ');
+            putchar(st & B(i) ? '1' : '0');
 		putchar('\n');
         state = 0;
 		for (i = 0; i < N; i++)
