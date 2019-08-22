@@ -43,7 +43,7 @@ int     encryption(int fd[2], int *key, int key_len)
         write(fd[1], &block, U);
     }
     // check errors ?
-    // end gestion ?
+    // end gestion for decryption ?
     return (0);
 }
 
@@ -79,6 +79,7 @@ int     main(int argc, char **argv)
             i++;
         }
         encryption(fd, key, key_len);
+	// add decryption gestion
     }
     else
     {
