@@ -42,11 +42,12 @@ int     encryption(int fd[2], int *key, int key_len)
         block = encrypt_block(block, key, key_len, 0);
         write(fd[1], &block, U);
     }
-    // check errors ?
-    // end gestion for decryption ?
+    // TODO : check errors ?
+    // TODO : end gestion for decryption ?
     return (0);
 }
 
+// TODO : print states for test
 int     main(int argc, char **argv)
 {
     char    *key;
@@ -79,7 +80,7 @@ int     main(int argc, char **argv)
             i++;
         }
         encryption(fd, key, key_len);
-	// add decryption gestion
+	// TODO : add decryption gestion
     }
     else
     {
