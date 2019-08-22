@@ -6,6 +6,7 @@
 typedef unsigned long long ull;
 // Nombre de bits d'un octet * le nombre d'octets d'un unsigned long long.
 #define N  (sizeof(ull) * CHAR_BIT)
+#define U  sizeof(ull)
 // Masque x sur un unsigned long long.
 #define B(x) (1ULL << (x))
 
@@ -38,10 +39,10 @@ int     encryption(int fd[2], int *key, int key_len)
 
     for (int i = 0; i < 64; i++) // gen seed state
         encrypt_block(0, key, key_len, 1);
-    while (read(fd[0], &block, 8)) // encryption
+    while (read(fd[0], &block, U)) // encryption
     {
         block = encrypt_block(block, key, key_len, 0);
-        write(fd[1], &block, 8);
+        write(fd[1], &block, U);
     }
     // check errors ?
     // end gestion ?
