@@ -4,10 +4,8 @@
 #include <limits.h>
 
 typedef unsigned long long ull;
-// Nombre de bits d'un octet * le nombre d'octets d'un unsigned long long.
 #define N  (sizeof(ull) * CHAR_BIT)
 #define U  sizeof(ull)
-// Masque x sur un unsigned long long.
 #define B(x) (1ULL << (x))
 
 ull encrypt_block(ull block, int *key, int key_len, char gen_seed)
