@@ -36,6 +36,12 @@ typedef unsigned long long ull;
 // - redesign with structure for static ?
 // - header file
 
+// EVOLUTIONS :
+// - 2 states simultaneously / successively ?
+// - 1 mask / 1 hidden -> hidden / mask states result choose states permutation
+// - What criteria to permute ? % 2 ?
+// - 8 states ??? (1 for possible start states)
+
 ull 	encrypt_block(ull block, char *key, int key_len, char gen_seed)
 {
 	ull			st;
