@@ -21,35 +21,29 @@ typedef unsigned long long ull;
 #define N (sizeof(ull) * CHAR_BIT)
 #define U sizeof(ull)
 #define B(x) (1ULL << (x))
-
-// TO TEST : start seed select -> by first number of key ?
-// start state to test :
-// 12297829382473034410 -> 10
-// 6148914691236517205 -> 01
-// 9838263505978427528 -> 1000
-// 4919131752989213764- > 0100
-// 2459565876494606882 -> 0010
-// 1229782938247303441 -> 0001
-// 9259542123273814144 -> 10000000
-// 4629771061636907072 -> 01000000
-// 2314885530818453536 -> 00100000
-// 1157442765409226768 -> 00010000
-// 578721382704613384 -> 00001000
-// 289360691352306692 -> 00000100
-// 144680345676153346 -> 00000010
-// 72340172838076673 -> 00000001
+#define ST1 9259542123273814144
+#define ST2 4629771061636907072
+#define ST3 2314885530818453536
+#define ST4 1157442765409226768
+#define ST5 578721382704613384
+#define ST6 289360691352306692
+#define ST7 144680345676153346
+#define ST8 72340172838076673
 
 ull 	encrypt_block(ull block, char *key, int key_len, char gen_seed)
 {
 	ull			st;
 	static int	key_i = 0;
 	static int	rule_i = 0;
-	static ull	state = 2147483648;
+	static ull	state = 0;
 	char		rules[8] = {30, 135, 86, 149, 45, 101, 75, 89};
+	ull		start[8] = {ST1, ST2, ST3, ST4, ST5, ST6, ST7, ST8};
 
 	rule_i += key[key_i]; // get rule index by adding permutation value at key index
 	if (rule_i >= 8) // if rule index > 8, loop
 		rule_i -= 8;
+	if (!state)
+		state = start[rule_i];
 	st = state;
 	state = 0;
 	for (unsigned long i = 0; i < N; i++)
