@@ -30,6 +30,10 @@ typedef unsigned long long ull;
 #define ST7 144680345676153346
 #define ST8 72340172838076673
 
+// TODO :
+// - tests
+// - redesign with structure ?
+
 ull 	encrypt_block(ull block, char *key, int key_len, char gen_seed)
 {
 	ull			st;
