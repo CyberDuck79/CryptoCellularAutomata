@@ -18,6 +18,7 @@
 #include <string.h>
 
 typedef unsigned long long ull;
+#define USAGE "USAGE : (-e : encryption / -d : decryption) filename key :\n"
 #define N (sizeof(ull) * CHAR_BIT)
 #define U sizeof(ull)
 #define B(x) (1ULL << (x))
@@ -32,7 +33,7 @@ typedef unsigned long long ull;
 
 // TODO :
 // - tests
-// - redesign with structure ?
+// - redesign with structure for static ?
 
 ull 	encrypt_block(ull block, char *key, int key_len, char gen_seed)
 {
@@ -136,7 +137,7 @@ int		main(int argc, char **argv)
 	}
 	else
 	{
-		write(1, "USAGE : (-e : encryption / -d : decryption) filename key :\n", 59);
+		write(1, USAGE, sizeof(USAGE)); // sizeof(USAGE) ?
 	}
 	return(0);
 }
