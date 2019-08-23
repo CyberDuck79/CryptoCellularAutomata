@@ -34,6 +34,7 @@ typedef unsigned long long ull;
 // TODO :
 // - tests
 // - redesign with structure for static ?
+// - header file
 
 ull 	encrypt_block(ull block, char *key, int key_len, char gen_seed)
 {
