@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/24 10:46:59 by fhenrion          #+#    #+#             */
-/*   Updated: 2019/08/24 16:04:01 by fhenrion         ###   ########.fr       */
+/*   Updated: 2019/08/24 16:19:00 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include <errno.h>
 
 #define USAGE "USAGE : (-e : encryption / -d : decryption) filename key\n"
-#define LOG 0
+#define LOG 1
 #define N (sizeof(ull) * CHAR_BIT)
 #define U sizeof(ull)
 #define B(x) (1ULL << (x))

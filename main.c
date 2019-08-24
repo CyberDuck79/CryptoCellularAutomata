@@ -23,11 +23,11 @@
 //		- for each nb of key -> if (nb % 2) nb++ else nb--
 // - reverse reading key and reverse permute rules ?
 
-static void	logging(int rule, ull state)
+static void	logging(ull state)
 {
 	for (size_t i = N; i; i--)
 				write(1, state & B(i) ? "#" : " ", 1);
-	printf(" rule %d\n", rule);
+	printf(" nb %llu\n", state);
 }
 
 static ull 	encrypt_block(ull block, int *key, cypher *cphr, char gen_seed)
@@ -46,7 +46,7 @@ static ull 	encrypt_block(ull block, int *key, cypher *cphr, char gen_seed)
 		if (rules[cphr->rule_i] & B(7 & (st>>(i-1) | st<<(N+1-i))))
 			cphr->state |= B(i);
 	if (LOG)
-		logging(rules[cphr->rule_i], cphr->state);
+		logging(cphr->state);
 	if (!gen_seed)
 		block = block ^ cphr->state;
 	cphr->key_i = cphr->key_i % cphr->key_len;
