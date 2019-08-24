@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "CAcrypto.h"
+#include "header.h"
 
 // TODO :
 // - tests
@@ -23,65 +23,68 @@
 //		- for each nb of key -> if (nb % 2) nb++ else nb--
 // - reverse reading key and reverse permute rules ?
 
-static ull 	encrypt_block(ull block, char *key, cypher *cphr, char gen_seed)
+static void	logging(int rule, ull state)
+{
+	for (size_t i = N; i; i--)
+				write(1, state & B(i) ? "#" : " ", 1);
+	printf(" rule %d\n", rule);
+}
+
+static ull 	encrypt_block(ull block, int *key, cypher *cphr, char gen_seed)
 {
 	ull				st;
-	unsigned long	i;
-	char			rules[8] = {30, 135, 86, 149, 45, 101, 75, 89};
-	ull				start[8] = {ST1, ST2, ST3, ST4, ST5, ST6, ST7, ST8};
+	int				rules[16] = {RULES};
+	ull				start[9] = {START_STATES};
 
-	cphr->rule_i += key[cphr->key_i];
-	if (cphr->rule_i >= 8)
-		cphr->rule_i -= 8;
+	cphr->rule_i += key[cphr->key_i++];
+	cphr->rule_i = cphr->rule_i % 16;
 	if (!cphr->state)
-		cphr->state = start[cphr->rule_i];
+		cphr->state = start[(cphr->rule_i - 1)];
 	st = cphr->state;
 	cphr->state = 0;
-	for (i = 0; i < N; i++)
+	for (size_t i = 0; i < N; i++)
 		if (rules[cphr->rule_i] & B(7 & (st>>(i-1) | st<<(N+1-i))))
 			cphr->state |= B(i);
-	// logging
-	for (i = N; i; i--)
-			write(1, cphr->state & B(i) ? "#" : " ", 1);
-	write(1, "\n", 1);
+	if (LOG)
+		logging(rules[cphr->rule_i], cphr->state);
 	if (!gen_seed)
 		block = block ^ cphr->state;
-	if (++(cphr->key_i) == cphr->key_len)
-		cphr->key_i = 0;
+	cphr->key_i = cphr->key_i % cphr->key_len;
 	return (block);
 }
 
-static int	encryption(data	*data)
+static void	encryption(int fd[2], int *key, size_t keylen)
 {
 	ull		block;
+	ull		tmp;
 	size_t	read_size;
-	cypher	cphr = {0, 0, data->key_len, 0};;
+	cypher	cphr = {0, 0, keylen, 0};
 
-	for (int i = 0; i < data->key_len; i++)
-		encrypt_block(0, data->key, &cphr, 1);
-	while ((read_size = read(data->fd[0], &block, U)))
+	for (size_t i = 0; i < keylen; i++)
+		encrypt_block(0, key, &cphr, 1);
+	while ((read_size = read(fd[0], &block, U)))
 	{
-		block = encrypt_block(block, data->key, &cphr, 0);
-		write(data->fd[1], &block, read_size);
+		tmp = block;
+		while (tmp == block)
+			block = encrypt_block(block, key, &cphr, 0);
+		write(fd[1], &block, read_size);
 	}
-	// TODO : check errors ?
-	return (0);
 }
 
-static char	*read_key(char *str, int key_len)
+static int	*read_key(char *str)
 {
 	int		i = 0;
-	char	*key;
+	int		*key;
 	char	c[2] = {0};
 
-	if (!(key = (char*)malloc(sizeof(char) * key_len)))
+	if (!(key = (int*)malloc(sizeof(int) * strlen(str))))
 	{
 		perror("memory allocation failed");
 		exit(EXIT_FAILURE);
 	}
 	while((c[0] = str[i]))
 	{
-		if(!(key[i] = (char)atoi(c)))
+		if(!(key[i] = atoi(c)))
 		{
 			write(2, "invalid key\n", 12);
 			exit(EXIT_FAILURE);
@@ -94,19 +97,17 @@ static char	*read_key(char *str, int key_len)
 int		main(int argc, char **argv)
 {
 	char	*file;
-	data	data = {0, 0, {0, 0}};
+	data	data = {0, {0, 0}};
 
 	if (argc == 4 && check_option(argv[1]))
 	{
-		while (argv[3][data.key_len])
-			data.key_len++;
-		data.key = read_key(argv[3], data.key_len);
+		data.key = read_key(argv[3]);
 		if (!strcmp("-e", argv[1]))
 		{
 			file = add_extension(argv[2]);
 			if ((data.fd[0] = open(argv[2], O_RDONLY)) == -1 || \
 			(data.fd[1] = open(file, O_WRONLY | O_CREAT, 0644)) == -1)
-			open_error(1);
+				open_error(1);
 		}
 		else
 		{
@@ -117,7 +118,8 @@ int		main(int argc, char **argv)
 			(data.fd[1] = open(file, O_WRONLY | O_CREAT, 0644)) == -1)
 				open_error(1);
 		}
-		encryption(&data);
+		encryption(data.fd, data.key, strlen(argv[3]));
+		remove(argv[2]);
 	}
 	else
 	{
