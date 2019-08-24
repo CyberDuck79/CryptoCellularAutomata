@@ -34,17 +34,16 @@ static ull 	encrypt_block(ull block, int *key, cypher *cphr, char gen_seed)
 {
 	ull				st;
 	int				rules[16] = {RULES};
-	ull				start[9] = {START_STATES};
 
 	cphr->rule_i += key[cphr->key_i++];
 	cphr->rule_i = cphr->rule_i % 16;
-	if (!cphr->state)
-		cphr->state = start[(cphr->rule_i - 1)];
 	st = cphr->state;
 	cphr->state = 0;
 	for (size_t i = 0; i < N; i++)
 		if (rules[cphr->rule_i] & B(7 & (st>>(i-1) | st<<(N+1-i))))
 			cphr->state |= B(i);
+	if (!cphr->state)
+		cphr->state = 4629771061636907072ULL;
 	if (LOG)
 		logging(cphr->state);
 	if (!gen_seed)
@@ -56,17 +55,15 @@ static ull 	encrypt_block(ull block, int *key, cypher *cphr, char gen_seed)
 static void	encryption(int fd[2], int *key, size_t keylen)
 {
 	ull		block;
-	ull		tmp;
 	size_t	read_size;
 	cypher	cphr = {0, 0, keylen, 0};
 
+	cphr->state = 4629771061636907072ULL;
 	for (size_t i = 0; i < keylen; i++)
 		encrypt_block(0, key, &cphr, 1);
 	while ((read_size = read(fd[0], &block, U)))
 	{
-		tmp = block;
-		while (tmp == block)
-			block = encrypt_block(block, key, &cphr, 0);
+		block = encrypt_block(block, key, &cphr, 0);
 		write(fd[1], &block, read_size);
 	}
 }
@@ -120,7 +117,7 @@ int		main(int argc, char **argv)
 				open_error(1);
 		}
 		encryption(fd, key, strlen(argv[3]));
-		remove(argv[2]);
+		//remove(argv[2]);
 	}
 	else
 	{
