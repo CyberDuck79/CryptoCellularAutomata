@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/24 10:46:59 by fhenrion          #+#    #+#             */
-/*   Updated: 2019/08/24 12:14:28 by fhenrion         ###   ########.fr       */
+/*   Updated: 2019/08/24 13:59:57 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+#include <errno.h>
 
 typedef unsigned long long ull;
 #define USAGE "USAGE : (-e : encryption / -d : decryption) filename key\n"
@@ -45,3 +46,9 @@ typedef struct
 	int		key_len;
 	int		fd[2];
 }		data;
+
+int		check_option(char *str);
+void	open_error(int type);
+int		check_extension(char *str);
+char	*remove_extension(char *str);
+char	*add_extension(char *str);

@@ -14,8 +14,6 @@
 
 // TODO :
 // - tests
-// - dechiffrement
-// - static / extern
 // - evolution
 
 // EVOLUTIONS :
@@ -25,7 +23,7 @@
 //		- for each nb of key -> if (nb % 2) nb++ else nb--
 // - reverse reading key and reverse permute rules ?
 
-ull 	encrypt_block(ull block, char *key, cypher *cphr, char gen_seed)
+static ull 	encrypt_block(ull block, char *key, cypher *cphr, char gen_seed)
 {
 	ull				st;
 	unsigned long	i;
@@ -53,7 +51,7 @@ ull 	encrypt_block(ull block, char *key, cypher *cphr, char gen_seed)
 	return (block);
 }
 
-int		encryption(data	*data)
+static int	encryption(data	*data)
 {
 	ull		block;
 	size_t	read_size;
@@ -70,16 +68,7 @@ int		encryption(data	*data)
 	return (0);
 }
 
-int		check_option(char *str)
-{
-	if (!strcmp("-e", str))
-		return (1);
-	else if (!strcmp("-d", str))
-		return (1);
-	return (0);
-}
-
-char	*read_key(char *str, int key_len)
+static char	*read_key(char *str, int key_len)
 {
 	int		i = 0;
 	char	*key;
@@ -88,77 +77,18 @@ char	*read_key(char *str, int key_len)
 	if (!(key = (char*)malloc(sizeof(char) * key_len)))
 	{
 		perror("memory allocation failed");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	while((c[0] = str[i]))
 	{
 		if(!(key[i] = (char)atoi(c)))
 		{
-			perror("invalid key");
-			exit(1);
+			write(2, "invalid key\n", 12);
+			exit(EXIT_FAILURE);
 		}
 		i++;
 	}
 	return (key);
-}
-
-char	*add_extension(char *str)
-{
-	int		i = 0;
-	size_t	len = 0;
-	char	*output;
-
-	while (str[i++])
-		len++;
-	output = (char*)malloc(sizeof(char) * (len + 4));
-	i = -1;
-	while (str[++i])
-		output[i] = str[i];
-	output[i++] = '.';
-	output[i++] = 'c';
-	output[i++] = 'a';
-	output[i++] = '\0';
-	return (output);
-}
-
-char	*remove_extension(char *str)
-{
-	size_t	i = 0;
-	size_t	len = 0;
-	char	*output;
-
-	while (str[i++])
-		len++;
-	output = (char*)malloc(sizeof(char) * (len - 2));
-	i = 0;
-	while (i < (len - 3))
-	{
-		output[i] = str[i];
-		i++;
-	}
-	output[i] = '\0';
-	return (output);
-}
-
-int		check_extension(char *str)
-{
-	size_t	i = 0;
-
-	while (str[i])
-		i++;
-	if (str[--i] != 'a')
-		return (0);
-	if (str[--i] != 'c')
-		return (0);
-	if (str[--i] != '.')
-		return (0);
-	return (1);
-}
-
-void	open_error(void)
-{
-	perror("open failed");
-	exit(1);
 }
 
 int		main(int argc, char **argv)
@@ -176,16 +106,16 @@ int		main(int argc, char **argv)
 			file = add_extension(argv[2]);
 			if ((data.fd[0] = open(argv[2], O_RDONLY)) == -1 || \
 			(data.fd[1] = open(file, O_WRONLY | O_CREAT, 0644)) == -1)
-			open_error();
+			open_error(1);
 		}
 		else
 		{
 			if (!check_extension(argv[2]))
-				open_error();
+				open_error(0);
 			file = remove_extension(argv[2]);
 			if ((data.fd[0] = open(argv[2], O_RDONLY)) == -1 || \
 			(data.fd[1] = open(file, O_WRONLY | O_CREAT, 0644)) == -1)
-				open_error();
+				open_error(1);
 		}
 		encryption(&data);
 	}
