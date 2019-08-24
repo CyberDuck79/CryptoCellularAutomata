@@ -10,141 +10,188 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <fcntl.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <string.h>
-
-typedef unsigned long long ull;
-#define USAGE "USAGE : (-e : encryption / -d : decryption) filename key :\n"
-#define N (sizeof(ull) * CHAR_BIT)
-#define U sizeof(ull)
-#define B(x) (1ULL << (x))
-#define ST1 9259542123273814144
-#define ST2 4629771061636907072
-#define ST3 2314885530818453536
-#define ST4 1157442765409226768
-#define ST5 578721382704613384
-#define ST6 289360691352306692
-#define ST7 144680345676153346
-#define ST8 72340172838076673
+#include "CAcrypto.h"
 
 // TODO :
 // - tests
-// - redesign with structure for static ?
-// - header file
+// - dechiffrement
+// - static / extern
+// - evolution
 
 // EVOLUTIONS :
-// - 2 states simultaneously / successively ?
+// - 2 states simultaneously computed / successively swap
 // - 1 mask / 1 hidden -> hidden / mask states result choose states permutation
-// - What criteria to permute ? % 2 ?
-// - 8 states ??? (1 for possible start states)
+// - key of state 2 derived from original key :
+//		- for each nb of key -> if (nb % 2) nb++ else nb--
+// - reverse reading key and reverse permute rules ?
 
-ull 	encrypt_block(ull block, char *key, int key_len, char gen_seed)
+ull 	encrypt_block(ull block, char *key, cypher *cphr, char gen_seed)
 {
-	ull			st;
-	static int	key_i = 0;
-	static int	rule_i = 0;
-	static ull	state = 0;
-	char		rules[8] = {30, 135, 86, 149, 45, 101, 75, 89};
-	ull		start[8] = {ST1, ST2, ST3, ST4, ST5, ST6, ST7, ST8};
+	ull				st;
+	unsigned long	i;
+	char			rules[8] = {30, 135, 86, 149, 45, 101, 75, 89};
+	ull				start[8] = {ST1, ST2, ST3, ST4, ST5, ST6, ST7, ST8};
 
-	rule_i += key[key_i]; // get rule index by adding permutation value at key index
-	if (rule_i >= 8) // if rule index > 8, loop
-		rule_i -= 8;
-	if (!state)
-		state = start[rule_i];
-	st = state;
-	state = 0;
-	for (unsigned long i = 0; i < N; i++)
-		if (rules[rule_i] & B(7 & (st>>(i-1) | st<<(N+1-i))))
-			state |= B(i);
+	cphr->rule_i += key[cphr->key_i];
+	if (cphr->rule_i >= 8)
+		cphr->rule_i -= 8;
+	if (!cphr->state)
+		cphr->state = start[cphr->rule_i];
+	st = cphr->state;
+	cphr->state = 0;
+	for (i = 0; i < N; i++)
+		if (rules[cphr->rule_i] & B(7 & (st>>(i-1) | st<<(N+1-i))))
+			cphr->state |= B(i);
 	// logging
-	write(1, "===> State :\n", 13);
 	for (i = N; i; i--)
-			write(1, state & B(i) ? "1" : "0", 1);
+			write(1, cphr->state & B(i) ? "#" : " ", 1);
 	write(1, "\n", 1);
-	if (!gen_seed) // if seed gen, do not apply XOR mask
-	{
-		// logging
-		write(1, "===> block pre encryption :\n", 29);
-		for (i = N; i; i--)
-			write(1, block & B(i) ? "1" : "0", 1);
-		write(1, "\n", 1);
-		block = block ^ state;
-		// logging
-		write(1, "===> block post encryption :\n", 30);
-		for (i = N; i; i--)
-			write(1, block & B(i) ? "1" : "0", 1);
-		write(1, "\n", 1);
-	}
-	if (++key_i == key_len) // if at key end return to start
-		key_i = 0;
+	if (!gen_seed)
+		block = block ^ cphr->state;
+	if (++(cphr->key_i) == cphr->key_len)
+		cphr->key_i = 0;
 	return (block);
 }
 
-int		encryption(int fd[2], char *key, int key_len)
+int		encryption(data	*data)
 {
 	ull		block;
 	size_t	read_size;
+	cypher	cphr = {0, 0, data->key_len, 0};;
 
-	write(1, "========== SEED GENERATION ==========\n", 38); // logging
-	for (int i = 0; i < 64; i++) // gen seed state
-		encrypt_block(0, key, key_len, 1);
-	write(1, "==========   ENCRYPTION    ==========\n", 38); // logging
-	while ((read_size = read(fd[0], &block, U))) // encryption
+	for (int i = 0; i < data->key_len; i++)
+		encrypt_block(0, data->key, &cphr, 1);
+	while ((read_size = read(data->fd[0], &block, U)))
 	{
-		block = encrypt_block(block, key, key_len, 0);
-		write(fd[1], &block, read_size);
+		block = encrypt_block(block, data->key, &cphr, 0);
+		write(data->fd[1], &block, read_size);
 	}
 	// TODO : check errors ?
-	// TODO : end gestion for decryption ? -> write only read_size ?
 	return (0);
+}
+
+int		check_option(char *str)
+{
+	if (!strcmp("-e", str))
+		return (1);
+	else if (!strcmp("-d", str))
+		return (1);
+	return (0);
+}
+
+char	*read_key(char *str, int key_len)
+{
+	int		i = 0;
+	char	*key;
+	char	c[2] = {0};
+
+	if (!(key = (char*)malloc(sizeof(char) * key_len)))
+	{
+		perror("memory allocation failed");
+		exit(1);
+	}
+	while((c[0] = str[i]))
+	{
+		if(!(key[i] = (char)atoi(c)))
+		{
+			perror("invalid key");
+			exit(1);
+		}
+		i++;
+	}
+	return (key);
+}
+
+char	*add_extension(char *str)
+{
+	int		i = 0;
+	size_t	len = 0;
+	char	*output;
+
+	while (str[i++])
+		len++;
+	output = (char*)malloc(sizeof(char) * (len + 4));
+	i = -1;
+	while (str[++i])
+		output[i] = str[i];
+	output[i++] = '.';
+	output[i++] = 'c';
+	output[i++] = 'a';
+	output[i++] = '\0';
+	return (output);
+}
+
+char	*remove_extension(char *str)
+{
+	size_t	i = 0;
+	size_t	len = 0;
+	char	*output;
+
+	while (str[i++])
+		len++;
+	output = (char*)malloc(sizeof(char) * (len - 2));
+	i = 0;
+	while (i < (len - 3))
+	{
+		output[i] = str[i];
+		i++;
+	}
+	output[i] = '\0';
+	return (output);
+}
+
+int		check_extension(char *str)
+{
+	size_t	i = 0;
+
+	while (str[i])
+		i++;
+	if (str[--i] != 'a')
+		return (0);
+	if (str[--i] != 'c')
+		return (0);
+	if (str[--i] != '.')
+		return (0);
+	return (1);
+}
+
+void	open_error(void)
+{
+	perror("open failed");
+	exit(1);
 }
 
 int		main(int argc, char **argv)
 {
-	char	*key;
-	char	c[2] = {0};
-	int		fd[2];
-	int		i = 0;
-	int		key_len = 0;
+	char	*file;
+	data	data = {0, 0, {0, 0}};
 
-	if (argc == 4)
+	if (argc == 4 && check_option(argv[1]))
 	{
-		// TODO :
-		// - prendre le nom du fichier et ajouter / enlever extension
-		// - gerer options sur argv[1]
-		if ((fd[0] = open(argv[2], O_RDONLY)) == -1 || \
-		(fd[1] = open("output.ca",  O_WRONLY | O_CREAT, 0644)) == -1)
+		while (argv[3][data.key_len])
+			data.key_len++;
+		data.key = read_key(argv[3], data.key_len);
+		if (!strcmp("-e", argv[1]))
 		{
-			perror("open failed");
-			exit(1);
+			file = add_extension(argv[2]);
+			if ((data.fd[0] = open(argv[2], O_RDONLY)) == -1 || \
+			(data.fd[1] = open(file, O_WRONLY | O_CREAT, 0644)) == -1)
+			open_error();
 		}
-		while (argv[3][key_len])
-			key_len++;
-		if (!(key = (char*)malloc(sizeof(char) * key_len)))
+		else
 		{
-			perror("memory allocation failed");
-			exit(1);
+			if (!check_extension(argv[2]))
+				open_error();
+			file = remove_extension(argv[2]);
+			if ((data.fd[0] = open(argv[2], O_RDONLY)) == -1 || \
+			(data.fd[1] = open(file, O_WRONLY | O_CREAT, 0644)) == -1)
+				open_error();
 		}
-		while((c[0] = argv[3][i]))
-		{
-			if(!(key[i] = (char)atoi(c)))
-			{
-				perror("invalid key");
-				exit(1);
-			}
-			i++;
-		}
-		encryption(fd, key, key_len);
-		// TODO : add decryption gestion
+		encryption(&data);
 	}
 	else
 	{
-		write(1, USAGE, sizeof(USAGE)); // sizeof(USAGE) ?
+		write(1, USAGE, sizeof(USAGE));
 	}
 	return(0);
 }
