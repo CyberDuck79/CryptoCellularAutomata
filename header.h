@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/24 10:46:59 by fhenrion          #+#    #+#             */
-/*   Updated: 2019/08/24 15:56:09 by fhenrion         ###   ########.fr       */
+/*   Updated: 2019/08/24 16:04:01 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 #include <string.h>
 #include <errno.h>
 
-typedef unsigned long long ull;
 #define USAGE "USAGE : (-e : encryption / -d : decryption) filename key\n"
 #define LOG 0
 #define N (sizeof(ull) * CHAR_BIT)
@@ -36,6 +35,8 @@ typedef unsigned long long ull;
 #define ST9 6148914691236517205ULL
 #define START_STATES ST1,ST2,ST3,ST4,ST5,ST6,ST7,ST8,ST9
 
+typedef unsigned long long ull;
+
 typedef struct
 {
 	int		key_i;
@@ -43,12 +44,6 @@ typedef struct
 	size_t	key_len;
 	ull		state;
 }			cypher;
-
-typedef struct
-{
-	int		*key;
-	int		fd[2];
-}			data;
 
 int		check_option(char *str);
 void	open_error(int type);

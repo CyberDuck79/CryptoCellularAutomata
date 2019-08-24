@@ -97,16 +97,17 @@ static int	*read_key(char *str)
 int		main(int argc, char **argv)
 {
 	char	*file;
-	data	data = {0, {0, 0}};
+	int		fd[2];
+	int		*key;
 
 	if (argc == 4 && check_option(argv[1]))
 	{
-		data.key = read_key(argv[3]);
+		key = read_key(argv[3]);
 		if (!strcmp("-e", argv[1]))
 		{
 			file = add_extension(argv[2]);
-			if ((data.fd[0] = open(argv[2], O_RDONLY)) == -1 || \
-			(data.fd[1] = open(file, O_WRONLY | O_CREAT, 0644)) == -1)
+			if ((fd[0] = open(argv[2], O_RDONLY)) == -1 || \
+			(fd[1] = open(file, O_WRONLY | O_CREAT, 0644)) == -1)
 				open_error(1);
 		}
 		else
@@ -114,11 +115,11 @@ int		main(int argc, char **argv)
 			if (!check_extension(argv[2]))
 				open_error(0);
 			file = remove_extension(argv[2]);
-			if ((data.fd[0] = open(argv[2], O_RDONLY)) == -1 || \
-			(data.fd[1] = open(file, O_WRONLY | O_CREAT, 0644)) == -1)
+			if ((fd[0] = open(argv[2], O_RDONLY)) == -1 || \
+			(fd[1] = open(file, O_WRONLY | O_CREAT, 0644)) == -1)
 				open_error(1);
 		}
-		encryption(data.fd, data.key, strlen(argv[3]));
+		encryption(fd, key, strlen(argv[3]));
 		remove(argv[2]);
 	}
 	else
