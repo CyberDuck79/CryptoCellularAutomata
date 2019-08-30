@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/24 10:46:59 by fhenrion          #+#    #+#             */
-/*   Updated: 2019/08/24 16:37:51 by fhenrion         ###   ########.fr       */
+/*   Updated: 2019/08/30 16:18:31 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,33 +20,33 @@
 
 #define USAGE "USAGE : (-e : encryption / -d : decryption) filename key\n"
 #define LOG 1
+#define EXPORT 1
 #define N (sizeof(ull) * CHAR_BIT)
 #define U sizeof(ull)
 #define B(x) (1ULL << (x))
-#define RULES 30,135,86,149,45,101,75,89,105,121,145,107,109,125,131,73
-#define ST1 9259542123273814144ULL
-#define ST2 4629771061636907072ULL
-#define ST3 2314885530818453536ULL
-#define ST4 1157442765409226768ULL
-#define ST5 578721382704613384ULL
-#define ST6 289360691352306692ULL
-#define ST7 144680345676153346ULL
-#define ST8 72340172838076673ULL
-#define ST9 6148914691236517205ULL
-#define START_STATES ST1,ST2,ST3,ST4,ST5,ST6,ST7,ST8,ST9
+#define RULES 30,86,73,105,150,109
+#define ST1 4294967296ULL
+#define ST2 268435456ULL
+#define ST3 2147483648ULL
+#define ST4 8589934592ULL
+#define ST5 34359738368ULL
+#define ST6 17179869184ULL
+#define ST7 536870912ULL
+#define ST8 1073741824ULL
+#define START_STATES ST1,ST2,ST3,ST4,ST5,ST6,ST7,ST8
 
 typedef unsigned long long ull;
 
-typedef struct
+typedef struct	s_cypher
 {
-	int		key_i;
-	int		rule_i;
-	size_t	key_len;
-	ull		state;
-}			cypher;
+	int			key_i;
+	int			rule_i;
+	size_t		key_len;
+	ull			state;
+}				cypher;
 
-int		check_option(char *str);
-void	open_error(int type);
-int		check_extension(char *str);
-char	*remove_extension(char *str);
-char	*add_extension(char *str);
+int				check_option(char *str);
+void			open_error(int type);
+int				check_extension(char *str);
+char			*remove_extension(char *str);
+char			*add_extension(char *str);
