@@ -3,7 +3,7 @@ Elementary Cellular Automata Cryptography
 
 ## algo version 2
 
-### analyse papier scientifique internet
+### analyse documentation
 rule radius r -> selon les voisins distant de <= r
 appliquer une regle differente par bit ?
 90 / 105 / 150 / 165 -> Tomassini and Perrenoud rules
