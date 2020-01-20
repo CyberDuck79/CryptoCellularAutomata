@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/01/17 19:00:46 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/01/20 20:07:46 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,11 +63,12 @@ static void	encryption(int fd, ull *hash)
 {
 	size_t	read_size;
 	ull		block;
+	rule	rules[4] = {RULE0, RULE1, RULE2, RULE3};
 	rule	rule_seq[127];
 	size_t	index;
 
 	for (index = 0; index < 127; index++)
-		rule_seq[index] = (*hash >> (index * 2)) & 0b11;
+		rule_seq[index] = rules[(*hash >> (index * 2)) & 0b11];
 	for (index = 0; index < 127; index++)
 		encrypt_block(&block, hash, rule_seq);
 	while ((read_size = read(fd, &block, 64)))
