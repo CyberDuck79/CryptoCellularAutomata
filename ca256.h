@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:09:21 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/01/17 19:00:45 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/01/20 23:28:06 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 # include <stddef.h>
 # include <unistd.h>
+# include <fcntl.h>
+# include <string.h>
 
 typedef unsigned long long	ull;
 
