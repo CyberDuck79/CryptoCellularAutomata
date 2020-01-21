@@ -22,4 +22,3 @@ How to use the rules sequence ?
 one by bit (strong and slower) or one by block (faster and weaker).  
 How about multiple cellular automatas ?
 1 used as mask, X other used as hidden, find an algorithm to switch the mask CA.  
-
