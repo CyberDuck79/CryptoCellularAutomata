@@ -6,15 +6,9 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/01/21 13:25:15 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/01/25 13:17:42 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-/*
-Convert to 265 bits
-comment faire avec 4 states ?
-
-*/
 
 #include "ca256.h"
 #include "sha256.h"
@@ -32,41 +26,56 @@ static void write_state(ull	*state)
 	write(1, "\n", 1);
 }
 
-static void encrypt_block(ull *block, ull *state, rule rule_seq[64], rule rules[4])
+static void encrypt_block(ull *block, ull *state, rule rule_seq[64])
 {
-	size_t	i;
-	ull		st = *state;
+	static rule	rules[8] = {30, 86, 90, 101, 105, 150, 153, 165};
+	size_t		i;
+	ull			st = *state;
 
 	*state = 0;
 	for (i = 0; i < 64; i++)
 	{
-		if (rule_seq[i] & B(0b111 & (st >> (i-1) | (st << (65-i)))))
+		if (rule_seq[i] & B(0b111 & (st >> (i - 1) | (st << (65 - i)))))
 			*state |= B(i);
-		rule_seq[i] = rules[0b11 & (st >> i)];
+		rule_seq[i] = rules[0b111 & (st >> i)];
 	}
 	*block ^= *state;
-	write_state(state); // -> output for tests
+	//write_state(state); // -> output for tests
+}
+
+static void rule_seq_gen(ull *state, rule rule_seq[4][64])
+{
+	rule	rules[8] = {30, 86, 90, 101, 105, 150, 153, 165};
+	size_t	i, j;
+
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 64; j++)
+			rule_seq[i][j] = rules[0b111 & (state[i] >> j)];
 }
 
 static int	encryption(int fd_in, int fd_out, ull *state)
 {
 	ull		block[4] = {0};
-	rule	rules[4] = {RULE0, RULE1, RULE2, RULE3};
 	rule	rule_seq[4][64];
-	size_t	i, j, read_size;
+	size_t	i, read_size;
 
-	if (read(fd_in, &block[0], 0) < 0 || write(fd_out, &block[0], 0) < 0)
-		return (1);
+	rule_seq_gen(state, rule_seq);
 	for (i = 0; i < 4; i++)
-		for (j = 0; j < 64; j++)
-			rule_seq[i][j] = rules[0b11 & (state[i] >> j)];
-	for (i = 0; i < 4; i++)
-		encrypt_block(&block[i], &state[i], rule_seq[i], rules);
-	while ((read_size = read(fd_in, block, 32)))
+		encrypt_block(&block[i], &state[i], rule_seq[i]);
+	while ((read_size = read(fd_in, block, 32)) > 0)
 	{
 		for (i = 0; i < 4; i++)
-			encrypt_block(&block[i], &state[i], rule_seq[i], rules);
-		write(fd_out, block, read_size);
+			encrypt_block(&block[i], &state[i], rule_seq[i]);
+		if (write(fd_out, block, read_size) < 1)
+		{
+			write(1, "Write file error\n", 17);
+			return (1);
+		}
+	}
+	if (read_size == -1)
+	{
+		write(1, "Read file error\n", 16);
+		return (1);
 	}
 	return (0);
 }
