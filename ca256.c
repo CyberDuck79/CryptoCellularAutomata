@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/01/25 13:17:42 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/07 23:00:54 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 
 static void write_state(ull	*state)
 {
-	size_t		i;
-	static char	square[6] = {0xe2, 0x96, 0x88, 0xe2, 0x96, 0x88};
+	static const char	square[6] = {0xe2, 0x96, 0x88, 0xe2, 0x96, 0x88};
+	size_t				i;
 
 	for (i = 0; i < 64; i++)
 		if (*state & B(i))
@@ -28,9 +28,10 @@ static void write_state(ull	*state)
 
 static void encrypt_block(ull *block, ull *state, rule rule_seq[64])
 {
-	static rule	rules[8] = {30, 86, 90, 101, 105, 150, 153, 165};
-	size_t		i;
-	ull			st = *state;
+	static const rule	rules[8] = {30, 86, 90, 101, 105, 150, 153, 165};
+	ull					st = *state;
+	size_t				i;
+	
 
 	*state = 0;
 	for (i = 0; i < 64; i++)
@@ -45,8 +46,8 @@ static void encrypt_block(ull *block, ull *state, rule rule_seq[64])
 
 static void rule_seq_gen(ull *state, rule rule_seq[4][64])
 {
-	rule	rules[8] = {30, 86, 90, 101, 105, 150, 153, 165};
-	size_t	i, j;
+	static const rule	rules[8] = {30, 86, 90, 101, 105, 150, 153, 165};
+	size_t				i, j;
 
 	for (i = 0; i < 4; i++)
 		for (j = 0; j < 64; j++)
@@ -110,24 +111,19 @@ int			main(int ac, char **av)
 
 	if (ac == 4)
 	{
+		fd_in = open(av[3], O_RDONLY);
 		if (!strcmp(av[1], "-e"))
-		{
 			out_file = add_extension(av[3]);
-			fd_out = open(out_file, O_WRONLY | O_CREAT, 0644);
-		}
 		else if (!strcmp(av[1], "-d"))
-		{
 			out_file = remove_extension(av[3]);
-			fd_out = open(out_file, O_WRONLY | O_CREAT, 0644);
-		}
 		else
 		{
 			write(1, "error option\n", 13);
 			return (0);
 		}
+		fd_out = open(out_file, O_WRONLY | O_CREAT, 0644);
 		hash_sha256((const uint8_t*)av[2], hash);
 		memcpy(&state, hash, 32);
-		fd_in = open(av[3], O_RDONLY);
 		printf("%s\n", out_file);
 		free(out_file);
 		encryption(fd_in, fd_out, state);
@@ -135,6 +131,6 @@ int			main(int ac, char **av)
 		close(fd_out);
 	}
 	else
-		write(1, "USAGE: -e(encrypt)/-d(decrypt) \"passphrase\" \"file\"\n", 27);
+		write(1, "USAGE: -e(encrypt)/-d(decrypt) \"passphrase\" \"file\"\n", 51);
 	return (0);
 }
