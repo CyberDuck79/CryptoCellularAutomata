@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/07 23:00:54 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/12 21:05:30 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,23 @@ static char	*remove_extension(char *name)
 	return (new);
 }
 
+
+static char	*parse_option(char *option, char *input_file)
+{
+	char *output_file;
+
+	if (!strcmp(option, "-e"))
+		output_file = add_extension(input_file);
+	else if (!strcmp(option, "-d"))
+		output_file = remove_extension(input_file);
+	else
+	{
+		write(1, "error option\n", 13);
+		return (NULL);
+	}
+	return (output_file);
+}
+
 int			main(int ac, char **av)
 {
 	//// USAGE : av[1] passphrase av[2] file
@@ -107,25 +124,17 @@ int			main(int ac, char **av)
 	ull		state[4];
 	int		fd_in;
 	int		fd_out;
-	char	*out_file;
+	char	*output_file;
 
 	if (ac == 4)
 	{
 		fd_in = open(av[3], O_RDONLY);
-		if (!strcmp(av[1], "-e"))
-			out_file = add_extension(av[3]);
-		else if (!strcmp(av[1], "-d"))
-			out_file = remove_extension(av[3]);
-		else
-		{
-			write(1, "error option\n", 13);
-			return (0);
-		}
-		fd_out = open(out_file, O_WRONLY | O_CREAT, 0644);
+		if (!(output_file = parse_option(av[1], av[3])))
+			return (1);
+		fd_out = open(output_file, O_WRONLY | O_CREAT, 0644);
+		free(output_file);
 		hash_sha256((const uint8_t*)av[2], hash);
 		memcpy(&state, hash, 32);
-		printf("%s\n", out_file);
-		free(out_file);
 		encryption(fd_in, fd_out, state);
 		close(fd_in);
 		close(fd_out);
