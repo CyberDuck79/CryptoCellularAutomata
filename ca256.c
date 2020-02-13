@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/13 15:15:47 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/13 18:47:15 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,7 @@ static int	encryption(int fd_in, int fd_out, ull *state, size_t file_size)
 		}
 		ft_progress(file_size);
 	}
+	write(1, "\n", 1);
 	if (read_size == -1)
 	{
 		write(1, "Read file error\n", 16);
@@ -137,9 +138,10 @@ int			main(int ac, char **av)
 		if (!(output_file = parse_option(av[1], av[3])))
 			return (1);
 		fd_out = open(output_file, O_WRONLY | O_CREAT, 0644);
-		free(output_file);
 		hash_sha256((const uint8_t*)av[2], hash);
 		memcpy(&state, hash, 32);
+		printf("%s -> %s\n", av[3], output_file);
+		free(output_file);
 		encryption(fd_in, fd_out, state, file_size / 32);
 		close(fd_in);
 		close(fd_out);
