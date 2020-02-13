@@ -6,12 +6,13 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/12 21:05:30 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/13 15:15:47 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ca256.h"
 #include "sha256.h"
+#include "progress_bar.h"
 
 static void write_state(ull	*state)
 {
@@ -54,7 +55,7 @@ static void rule_seq_gen(ull *state, rule rule_seq[4][64])
 			rule_seq[i][j] = rules[0b111 & (state[i] >> j)];
 }
 
-static int	encryption(int fd_in, int fd_out, ull *state)
+static int	encryption(int fd_in, int fd_out, ull *state, size_t file_size)
 {
 	ull		block[4] = {0};
 	rule	rule_seq[4][64];
@@ -63,6 +64,7 @@ static int	encryption(int fd_in, int fd_out, ull *state)
 	rule_seq_gen(state, rule_seq);
 	for (i = 0; i < 4; i++)
 		encrypt_block(&block[i], &state[i], rule_seq[i]);
+	ft_progress(file_size);
 	while ((read_size = read(fd_in, block, 32)) > 0)
 	{
 		for (i = 0; i < 4; i++)
@@ -72,6 +74,7 @@ static int	encryption(int fd_in, int fd_out, ull *state)
 			write(1, "Write file error\n", 17);
 			return (1);
 		}
+		ft_progress(file_size);
 	}
 	if (read_size == -1)
 	{
@@ -119,23 +122,25 @@ static char	*parse_option(char *option, char *input_file)
 
 int			main(int ac, char **av)
 {
-	//// USAGE : av[1] passphrase av[2] file
 	uint8_t	hash[32];
 	ull		state[4];
 	int		fd_in;
 	int		fd_out;
+	size_t	file_size;
 	char	*output_file;
 
 	if (ac == 4)
 	{
 		fd_in = open(av[3], O_RDONLY);
+		file_size = lseek(fd_in, 0L, SEEK_END) + 1;
+		lseek(fd_in, 0L, SEEK_SET);
 		if (!(output_file = parse_option(av[1], av[3])))
 			return (1);
 		fd_out = open(output_file, O_WRONLY | O_CREAT, 0644);
 		free(output_file);
 		hash_sha256((const uint8_t*)av[2], hash);
 		memcpy(&state, hash, 32);
-		encryption(fd_in, fd_out, state);
+		encryption(fd_in, fd_out, state, file_size / 32);
 		close(fd_in);
 		close(fd_out);
 	}

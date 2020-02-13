@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ca256.h                                            :+:      :+:    :+:   */
+/*   progress_bar.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/01/17 16:09:21 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/13 14:45:15 by fhenrion         ###   ########.fr       */
+/*   Created: 2020/02/13 15:13:47 by fhenrion          #+#    #+#             */
+/*   Updated: 2020/02/13 15:17:04 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CA256_H
-# define CA256_H
+#ifndef PROGRESS_BAR_H
+# define PROGRESS_BAR_H
 
 # include <stddef.h>
 # include <unistd.h>
@@ -19,10 +19,10 @@
 # include <string.h>
 # include <stdio.h>
 
-typedef unsigned long long	ull;
+# define BAR_LENGTH 60
+# define BAR "============================================================"
+# define LOAD "                                                            "
 
-#define B(x) (1ULL << (x))
-
-typedef unsigned char rule;
+void	ft_progress(size_t total);
 
 #endif

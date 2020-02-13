@@ -1,28 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ca256.h                                            :+:      :+:    :+:   */
+/*   progress_bar.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/01/17 16:09:21 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/13 14:45:15 by fhenrion         ###   ########.fr       */
+/*   Created: 2020/02/13 15:13:50 by fhenrion          #+#    #+#             */
+/*   Updated: 2020/02/13 15:15:42 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CA256_H
-# define CA256_H
+#include "progress_bar.h"
 
-# include <stddef.h>
-# include <unistd.h>
-# include <fcntl.h>
-# include <string.h>
-# include <stdio.h>
+void	ft_progress(size_t total)
+{
+	static size_t	count = 1;
+	int				bar = count * BAR_LENGTH / total;;
+	int				load = BAR_LENGTH - bar;
+	int				percent = count * 100 / total;
 
-typedef unsigned long long	ull;
-
-#define B(x) (1ULL << (x))
-
-typedef unsigned char rule;
-
-#endif
+	fflush(stdout);
+	printf("\rProgress [%.*s%.*s] %i%%", bar, BAR, load, LOAD, percent);
+	if (count < total)
+		count++;
+}
