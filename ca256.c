@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/15 00:00:21 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/15 00:27:00 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ static void rule_seq_gen(ull *states, rule rule_seq[4][64])
 			rule_seq[i][j] = rules[0b111 & (states[i] >> j)];
 }
 
-static int	encryption(int fd_in, int fd_out, ull *states, size_t file_size)
+static int	encryption(t_file *file, ull *states)
 {
 	ull		block[BLOCK_SIZE] = {0};
 	rule	rule_seq[16][64];
@@ -64,24 +64,18 @@ static int	encryption(int fd_in, int fd_out, ull *states, size_t file_size)
 	rule_seq_gen(states, rule_seq);
 	for (i = 0; i < 16; i++)
 		encrypt_block(&block[i], &states[i], rule_seq[i]);
-	ft_progress(file_size);
-	while ((read_size = read(fd_in, block, BUFFER_SIZE)) > 0)
+	ft_progress(file->size);
+	while ((read_size = read(file->fd_in, block, BUFFER_SIZE)) > 0)
 	{
 		for (i = 0; i < BLOCK_SIZE; i++)
 			encrypt_block(&block[i], &states[i % 16], rule_seq[i % 16]);
-		if (write(fd_out, block, read_size) < 1)
-		{
-			write(1, "Write file error\n", 17);
+		if (write(file->fd_out, block, read_size) < 1)
 			return (1);
-		}
-		ft_progress(file_size);
+		ft_progress(file->size);
 	}
 	write(1, "\n", 1);
 	if (read_size == -1)
-	{
-		write(1, "Read file error\n", 16);
 		return (1);
-	}
 	return (0);
 }
 
@@ -106,21 +100,14 @@ static char	*remove_extension(char *name)
 	return (new);
 }
 
-
 static char	*parse_option(char *option, char *input_file)
 {
-	char *output_file;
-
 	if (!strcmp(option, "-e"))
-		output_file = add_extension(input_file);
+		return (add_extension(input_file));
 	else if (!strcmp(option, "-d"))
-		output_file = remove_extension(input_file);
-	else
-	{
-		write(1, "error option\n", 13);
-		return (NULL);
-	}
-	return (output_file);
+		return (remove_extension(input_file));
+	write(1, "error option\n", 13);
+	return (NULL);
 }
 
 static void	gen_state(char *passphrase, ull states[16])
@@ -140,25 +127,23 @@ static void	gen_state(char *passphrase, ull states[16])
 int			main(int ac, char **av)
 {
 	ull		states[16];
-	int		fd_in;
-	int		fd_out;
-	size_t	file_size;
-	char	*output_file;
+	t_file	file;
 
 	if (ac == 4)
 	{
-		fd_in = open(av[3], O_RDONLY);
-		file_size = lseek(fd_in, 0L, SEEK_END) + 1;
-		lseek(fd_in, 0L, SEEK_SET);
-		if (!(output_file = parse_option(av[1], av[3])))
-			return (1);
-		fd_out = open(output_file, O_WRONLY | O_CREAT, 0644);
+		file.fd_in = open(av[3], O_RDONLY);
+		file.size = lseek(file.fd_in, 0L, SEEK_END) / BUFFER_SIZE;
+		lseek(file.fd_in, 0L, SEEK_SET);
+		if (!(file.output_name = parse_option(av[1], av[3])))
+			return (0);
+		file.fd_out = open(file.output_name, O_WRONLY | O_CREAT, 0644);
 		gen_state(av[2], states);
-		printf("%s -> %s\n", av[3], output_file);
-		free(output_file);
-		encryption(fd_in, fd_out, states, file_size / BUFFER_SIZE);
-		close(fd_in);
-		close(fd_out);
+		printf("%s -> %s\n", av[3], file.output_name);
+		if (encryption(&file, states))
+			write(1, "Error while reading or writing files\n", 1);
+		free(file.output_name);
+		close(file.fd_in);
+		close(file.fd_out);
 	}
 	else
 		write(1, "USAGE: -e(encrypt)/-d(decrypt) \"passphrase\" \"file\"\n", 51);
