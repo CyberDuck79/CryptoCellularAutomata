@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/14 20:12:35 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/15 00:00:21 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,30 +45,30 @@ static void encrypt_block(ull *block, ull *state, rule rule_seq[64])
 	//write_state(state); // -> output for tests
 }
 
-static void rule_seq_gen(ull *state, rule rule_seq[4][64])
+static void rule_seq_gen(ull *states, rule rule_seq[4][64])
 {
 	static const rule	rules[8] = {30, 86, 90, 101, 105, 150, 153, 165};
 	size_t				i, j;
 
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 16; i++)
 		for (j = 0; j < 64; j++)
-			rule_seq[i][j] = rules[0b111 & (state[i] >> j)];
+			rule_seq[i][j] = rules[0b111 & (states[i] >> j)];
 }
 
-static int	encryption(int fd_in, int fd_out, ull *state, size_t file_size)
+static int	encryption(int fd_in, int fd_out, ull *states, size_t file_size)
 {
 	ull		block[BLOCK_SIZE] = {0};
-	rule	rule_seq[4][64];
+	rule	rule_seq[16][64];
 	size_t	i, read_size;
 
-	rule_seq_gen(state, rule_seq);
-	for (i = 0; i < 4; i++)
-		encrypt_block(&block[i], &state[i], rule_seq[i]);
+	rule_seq_gen(states, rule_seq);
+	for (i = 0; i < 16; i++)
+		encrypt_block(&block[i], &states[i], rule_seq[i]);
 	ft_progress(file_size);
 	while ((read_size = read(fd_in, block, BUFFER_SIZE)) > 0)
 	{
 		for (i = 0; i < BLOCK_SIZE; i++)
-			encrypt_block(&block[i], &state[i % 4], rule_seq[i % 4]);
+			encrypt_block(&block[i], &states[i % 16], rule_seq[i % 16]);
 		if (write(fd_out, block, read_size) < 1)
 		{
 			write(1, "Write file error\n", 17);
@@ -123,10 +123,23 @@ static char	*parse_option(char *option, char *input_file)
 	return (output_file);
 }
 
-int			main(int ac, char **av)
+static void	gen_state(char *passphrase, ull states[16])
 {
 	uint8_t	hash[32];
-	ull		state[4];
+
+	hash_sha256((const uint8_t*)passphrase, hash);
+	memcpy(&states[0], hash, 32);
+	hash_sha256(hash, hash);
+	memcpy(&states[4], hash, 32);
+	hash_sha256(hash, hash);
+	memcpy(&states[8], hash, 32);
+	hash_sha256(hash, hash);
+	memcpy(&states[12], hash, 32);
+}
+
+int			main(int ac, char **av)
+{
+	ull		states[16];
 	int		fd_in;
 	int		fd_out;
 	size_t	file_size;
@@ -140,11 +153,10 @@ int			main(int ac, char **av)
 		if (!(output_file = parse_option(av[1], av[3])))
 			return (1);
 		fd_out = open(output_file, O_WRONLY | O_CREAT, 0644);
-		hash_sha256((const uint8_t*)av[2], hash);
-		memcpy(&state, hash, 32);
+		gen_state(av[2], states);
 		printf("%s -> %s\n", av[3], output_file);
 		free(output_file);
-		encryption(fd_in, fd_out, state, file_size / BUFFER_SIZE);
+		encryption(fd_in, fd_out, states, file_size / BUFFER_SIZE);
 		close(fd_in);
 		close(fd_out);
 	}
