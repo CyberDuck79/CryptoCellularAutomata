@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/15 00:27:00 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/15 00:29:57 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,10 +82,12 @@ static int	encryption(t_file *file, ull *states)
 static char	*add_extension(char *name)
 {
 	char	*new;
+	size_t	len;
 
-	new = (char*)malloc(strlen(name) + 4);
+	len = strlen(name);
+	new = (char*)malloc(len + 4);
 	strcpy(new, name);
-	strlcpy(new + strlen(name), ".ca", 4);
+	strlcpy(new + len, ".ca", 4);
 	return (new);
 }
 
@@ -129,13 +131,11 @@ int			main(int ac, char **av)
 	ull		states[16];
 	t_file	file;
 
-	if (ac == 4)
+	if (ac == 4 && (file.output_name = parse_option(av[1], av[3])))
 	{
 		file.fd_in = open(av[3], O_RDONLY);
 		file.size = lseek(file.fd_in, 0L, SEEK_END) / BUFFER_SIZE;
 		lseek(file.fd_in, 0L, SEEK_SET);
-		if (!(file.output_name = parse_option(av[1], av[3])))
-			return (0);
 		file.fd_out = open(file.output_name, O_WRONLY | O_CREAT, 0644);
 		gen_state(av[2], states);
 		printf("%s -> %s\n", av[3], file.output_name);
