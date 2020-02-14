@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/15 00:29:57 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/15 00:31:35 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,20 @@ static int	encryption(t_file *file, ull *states)
 	return (0);
 }
 
+static void	gen_state(char *passphrase, ull states[16])
+{
+	uint8_t	hash[32];
+
+	hash_sha256((const uint8_t*)passphrase, hash);
+	memcpy(&states[0], hash, 32);
+	hash_sha256(hash, hash);
+	memcpy(&states[4], hash, 32);
+	hash_sha256(hash, hash);
+	memcpy(&states[8], hash, 32);
+	hash_sha256(hash, hash);
+	memcpy(&states[12], hash, 32);
+}
+
 static char	*add_extension(char *name)
 {
 	char	*new;
@@ -110,20 +124,6 @@ static char	*parse_option(char *option, char *input_file)
 		return (remove_extension(input_file));
 	write(1, "error option\n", 13);
 	return (NULL);
-}
-
-static void	gen_state(char *passphrase, ull states[16])
-{
-	uint8_t	hash[32];
-
-	hash_sha256((const uint8_t*)passphrase, hash);
-	memcpy(&states[0], hash, 32);
-	hash_sha256(hash, hash);
-	memcpy(&states[4], hash, 32);
-	hash_sha256(hash, hash);
-	memcpy(&states[8], hash, 32);
-	hash_sha256(hash, hash);
-	memcpy(&states[12], hash, 32);
 }
 
 int			main(int ac, char **av)
