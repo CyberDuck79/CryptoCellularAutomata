@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:09:21 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/15 00:07:15 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/16 14:05:19 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,18 @@
 # include <fcntl.h>
 # include <string.h>
 # include <stdio.h>
-
-# ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 4194304
-# endif
-
-# define BLOCK_SIZE BUFFER_SIZE / 8
-
-# define B(x) (1ULL << (x))
+# include <stdlib.h>
 
 typedef unsigned long long	ull;
+typedef unsigned char		rule;
 
-typedef unsigned char	rule;
+# define BUFFER_SIZE	1048576
+# define BLOCK_SIZE		BUFFER_SIZE / 8
+# define STATE_NB		16
+# define HASH_SIZE		32
+# define ULL_SIZE		sizeof(ull) * 8
+
+# define B(x) (1ULL << (x))
 
 typedef struct	s_file
 {
@@ -38,5 +38,7 @@ typedef struct	s_file
 	size_t		size;
 	char		*output_name;
 }				t_file;
+
+char			*parse_option(char *option, char *input_file);
 
 #endif
