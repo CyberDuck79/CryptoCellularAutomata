@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/16 20:49:42 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/27 01:07:00 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ static int	encryption(t_file *file, ull states[STATE_NB])
 	ft_progress(file->size);
 	while ((read_size = read(file->read, block, BUFFER_SIZE)) > 0)
 	{
-		for (i = 0; i < read_size; i++)
+		for (i = 0; i < BLOCK_SIZE; i++)
 			encrypt_block(&block[i], &states[i % STATE_NB], rule_seq[i % STATE_NB]);
 		if (write(file->write, block, read_size) != read_size)
 			return (1);
