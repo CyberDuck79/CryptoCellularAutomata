@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:09:21 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/16 14:05:19 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/16 19:40:46 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,8 @@ typedef unsigned char		rule;
 
 typedef struct	s_file
 {
-	int			fd_in;
-	int			fd_out;
+	int			read;
+	int			write;
 	size_t		size;
 	char		*output_name;
 }				t_file;

@@ -6,13 +6,19 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/16 14:03:32 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/02/16 20:49:42 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ca256.h"
 #include "sha256.h"
 #include "progress_bar.h"
+
+/*
+** TODO :
+** - error if extension is not .ca for decryption
+** - Ways to improve randomness ?
+*/
 
 /*
 static void write_state(ull	*state)
@@ -61,18 +67,17 @@ static int	encryption(t_file *file, ull states[STATE_NB])
 {
 	ull			block[BLOCK_SIZE] = {0};
 	rule		rule_seq[STATE_NB][ULL_SIZE];
-	size_t		i;
-	long long	read_size;
+	int			i, read_size;
 
 	rule_seq_gen(states, rule_seq);
 	for (i = 0; i < STATE_NB; i++)
 		encrypt_block(&block[i], &states[i], rule_seq[i]);
 	ft_progress(file->size);
-	while ((read_size = read(file->fd_in, block, BUFFER_SIZE)) > 0)
+	while ((read_size = read(file->read, block, BUFFER_SIZE)) > 0)
 	{
-		for (i = 0; i < BLOCK_SIZE; i++)
+		for (i = 0; i < read_size; i++)
 			encrypt_block(&block[i], &states[i % STATE_NB], rule_seq[i % STATE_NB]);
-		if (write(file->fd_out, block, read_size) < 1)
+		if (write(file->write, block, read_size) != read_size)
 			return (1);
 		ft_progress(file->size);
 	}
@@ -84,16 +89,11 @@ static int	encryption(t_file *file, ull states[STATE_NB])
 
 static void	gen_state(char *passphrase, ull states[STATE_NB])
 {
-	uint8_t	hash[HASH_SIZE];
+	size_t	i;
 
-	hash_sha256((const uint8_t*)passphrase, hash);
-	memcpy(&states[0], hash, HASH_SIZE);
-	hash_sha256((uint8_t*)&states[0], hash);
-	memcpy(&states[4], hash, HASH_SIZE);
-	hash_sha256((uint8_t*)&states[4], hash);
-	memcpy(&states[8], hash, HASH_SIZE);
-	hash_sha256((uint8_t*)&states[8], hash);
-	memcpy(&states[12], hash, HASH_SIZE);
+	hash_sha256((const uint8_t*)passphrase, (uint8_t*)&states[0]);
+	for (i = 4; i < STATE_NB; i += 4)
+		hash_sha256((const uint8_t*)&states[i - 4], (uint8_t*)&states[i]);
 }
 
 int			main(int ac, char **av)
@@ -103,17 +103,17 @@ int			main(int ac, char **av)
 
 	if (ac == 4 && (file.output_name = parse_option(av[1], av[3])))
 	{
-		file.fd_in = open(av[3], O_RDONLY);
-		file.size = lseek(file.fd_in, 0L, SEEK_END) / BUFFER_SIZE;
-		lseek(file.fd_in, 0L, SEEK_SET);
-		file.fd_out = open(file.output_name, O_WRONLY | O_CREAT, 0644);
+		file.read = open(av[3], O_RDONLY);
+		file.size = lseek(file.read, 0L, SEEK_END) / BUFFER_SIZE;
+		lseek(file.read, 0L, SEEK_SET);
+		file.write = open(file.output_name, O_WRONLY | O_CREAT, 0644);
 		gen_state(av[2], states);
 		printf("%s -> %s\n", av[3], file.output_name);
 		if (encryption(&file, states))
 			write(1, "Error while reading or writing files\n", 1);
 		free(file.output_name);
-		close(file.fd_in);
-		close(file.fd_out);
+		close(file.read);
+		close(file.write);
 	}
 	else
 		write(1, "USAGE: -e(encrypt)/-d(decrypt) \"passphrase\" \"file\"\n", 51);
