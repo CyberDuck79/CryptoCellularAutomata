@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:09:21 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/16 19:40:46 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/03/01 18:59:16 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,12 @@
 # include <string.h>
 # include <stdio.h>
 # include <stdlib.h>
+# include <errno.h>
 
 typedef unsigned long long	ull;
 typedef unsigned char		rule;
 
+# define ERROR			-1
 # define BUFFER_SIZE	1048576
 # define BLOCK_SIZE		BUFFER_SIZE / 8
 # define STATE_NB		16

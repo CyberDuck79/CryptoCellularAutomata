@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/27 01:07:00 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/03/01 19:36:11 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,10 +103,18 @@ int			main(int ac, char **av)
 
 	if (ac == 4 && (file.output_name = parse_option(av[1], av[3])))
 	{
-		file.read = open(av[3], O_RDONLY);
+		if ((file.read = open(av[3], O_RDONLY)) == ERROR)
+		{
+			perror(av[3]);
+			exit(errno);
+		}
 		file.size = lseek(file.read, 0L, SEEK_END) / BUFFER_SIZE;
 		lseek(file.read, 0L, SEEK_SET);
-		file.write = open(file.output_name, O_WRONLY | O_CREAT, 0644);
+		if ((file.write = open(file.output_name, O_WRONLY | O_CREAT, 0644)) == ERROR)
+		{
+			perror(file.output_name);
+			exit(errno);
+		}
 		gen_state(av[2], states);
 		printf("%s -> %s\n", av[3], file.output_name);
 		if (encryption(&file, states))
