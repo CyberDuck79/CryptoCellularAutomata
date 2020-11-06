@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:09:21 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/03/01 18:59:16 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/11/06 14:13:15 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@
 # include <errno.h>
 
 typedef unsigned long long	ull;
-typedef unsigned char		rule;
 
 # define ERROR			-1
 # define BUFFER_SIZE	1048576
@@ -38,7 +37,6 @@ typedef struct	s_file
 	int			read;
 	int			write;
 	size_t		size;
-	char		*output_name;
 }				t_file;
 
 char			*parse_option(char *option, char *input_file);

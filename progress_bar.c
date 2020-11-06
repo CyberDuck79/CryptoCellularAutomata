@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/13 15:13:50 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/10/23 10:52:11 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/11/06 15:21:53 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,4 +25,10 @@ void	ft_progress(size_t total)
 	fflush(stdout);
 	if (count < total)
 		count++;
+}
+
+void	ft_progress_end(void)
+{
+	printf("\e[?25h");
+		write(1, "\n", 1);
 }

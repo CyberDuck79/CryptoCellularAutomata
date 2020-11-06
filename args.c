@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/16 13:55:45 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/16 13:57:14 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/11/06 14:58:23 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ static char	*remove_extension(char *name)
 	size_t	len;
 
 	len = strlen(name) - 2;
+	if (strncmp("ca", name + len, 2))
+		return (NULL);
 	new = (char*)malloc(len);
 	strlcpy(new, name, len);
 	return (new);
@@ -41,6 +43,5 @@ char		*parse_option(char *option, char *input_file)
 		return (add_extension(input_file));
 	else if (!strcmp(option, "-d"))
 		return (remove_extension(input_file));
-	write(1, "error option\n", 13);
 	return (NULL);
 }

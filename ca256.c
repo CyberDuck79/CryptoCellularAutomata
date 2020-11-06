@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/03/01 19:36:11 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/11/06 15:28:02 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 
 /*
 ** TODO :
-** - error if extension is not .ca for decryption
 ** - Ways to improve randomness ?
 */
 
@@ -24,9 +23,8 @@
 static void write_state(ull	*state)
 {
 	static const char	square[6] = {0xe2, 0x96, 0x88, 0xe2, 0x96, 0x88};
-	size_t				i;
 
-	for (i = 0; i < 64; i++)
+	for (int i = 0; i < 64; i++)
 		if (*state & B(i))
 			write(1, square, 6);
 		else
@@ -35,15 +33,14 @@ static void write_state(ull	*state)
 }
 */
 
-static void encrypt_block(ull *block, ull *state, rule rule_seq[ULL_SIZE])
+const uint8_t	rules[8] = {0x1E, 0x54, 0x5A, 0x65, 0x69, 0x96, 0x99, 0xA5};
+
+static void encrypt_block(ull *block, ull *state, uint8_t rule_seq[ULL_SIZE])
 {
-	static const rule	rules[8] = {30, 86, 90, 101, 105, 150, 153, 165};
-	ull					st = *state;
-	size_t				i;
-	
+	ull	st = *state;
 
 	*state = 0;
-	for (i = 0; i < ULL_SIZE; i++)
+	for (ull i = 0; i < ULL_SIZE; i++)
 	{
 		if (rule_seq[i] & B(0b111 & (st >> (i - 1) | (st << (65 - i)))))
 			*state |= B(i);
@@ -53,77 +50,90 @@ static void encrypt_block(ull *block, ull *state, rule rule_seq[ULL_SIZE])
 	//write_state(state); // -> output for tests
 }
 
-static void rule_seq_gen(ull states[STATE_NB], rule rule_seq[STATE_NB][ULL_SIZE])
+static void rule_seq_gen(ull states[STATE_NB], uint8_t rule_seq[STATE_NB][ULL_SIZE])
 {
-	static const rule	rules[8] = {30, 86, 90, 101, 105, 150, 153, 165};
-	size_t				i, j;
-
-	for (i = 0; i < STATE_NB; i++)
-		for (j = 0; j < ULL_SIZE; j++)
+	for (int i = 0; i < STATE_NB; i++)
+		for (ull j = 0; j < ULL_SIZE; j++)
 			rule_seq[i][j] = rules[0b111 & (states[i] >> j)];
 }
 
 static int	encryption(t_file *file, ull states[STATE_NB])
 {
-	ull			block[BLOCK_SIZE] = {0};
-	rule		rule_seq[STATE_NB][ULL_SIZE];
-	int			i, read_size;
+	ull		block[BLOCK_SIZE] = {0};
+	uint8_t	rule_seq[STATE_NB][ULL_SIZE];
+	ssize_t	read_size;
 
 	rule_seq_gen(states, rule_seq);
-	for (i = 0; i < STATE_NB; i++)
+	for (int i = 0; i < STATE_NB; i++)
 		encrypt_block(&block[i], &states[i], rule_seq[i]);
-	ft_progress(file->size);
 	while ((read_size = read(file->read, block, BUFFER_SIZE)) > 0)
 	{
-		for (i = 0; i < BLOCK_SIZE; i++)
+		for (int i = 0; i < BLOCK_SIZE; i++)
 			encrypt_block(&block[i], &states[i % STATE_NB], rule_seq[i % STATE_NB]);
 		if (write(file->write, block, read_size) != read_size)
-			return (1);
+		{
+			read_size = -1;
+			break;
+		}
 		ft_progress(file->size);
 	}
-	write(1, "\n", 1);
-	if (read_size < 0)
-		return (1);
-	return (0);
+	ft_progress_end();
+	close(file->read);
+	close(file->write);
+	return (read_size < 0 ? 1 : 0);
 }
 
 static void	gen_state(char *passphrase, ull states[STATE_NB])
 {
-	size_t	i;
-
 	hash_sha256((const uint8_t*)passphrase, (uint8_t*)&states[0]);
-	for (i = 4; i < STATE_NB; i += 4)
+	for (int i = 4; i < STATE_NB; i += 4)
 		hash_sha256((const uint8_t*)&states[i - 4], (uint8_t*)&states[i]);
+}
+
+static void	open_files(t_file *file, char **av, char *output_name)
+{
+	if ((file->read = open(av[3], O_RDONLY)) == ERROR)
+	{
+		perror(av[3]);
+		close(file->read);
+		exit(errno);
+	}
+	if ((file->write = open(output_name, O_WRONLY | O_CREAT, 0644)) == ERROR)
+	{
+		perror(output_name);
+		close(file->read);
+		close(file->write);
+		exit(errno);
+	}
+	file->size = lseek(file->read, 0L, SEEK_END) / BUFFER_SIZE;
+	lseek(file->read, 0L, SEEK_SET);
 }
 
 int			main(int ac, char **av)
 {
 	ull		states[STATE_NB] = {0};
 	t_file	file;
+	char	*output_name;
 
-	if (ac == 4 && (file.output_name = parse_option(av[1], av[3])))
+	if (ac != 4)
 	{
-		if ((file.read = open(av[3], O_RDONLY)) == ERROR)
-		{
-			perror(av[3]);
-			exit(errno);
-		}
-		file.size = lseek(file.read, 0L, SEEK_END) / BUFFER_SIZE;
-		lseek(file.read, 0L, SEEK_SET);
-		if ((file.write = open(file.output_name, O_WRONLY | O_CREAT, 0644)) == ERROR)
-		{
-			perror(file.output_name);
-			exit(errno);
-		}
-		gen_state(av[2], states);
-		printf("%s -> %s\n", av[3], file.output_name);
-		if (encryption(&file, states))
-			write(1, "Error while reading or writing files\n", 1);
-		free(file.output_name);
-		close(file.read);
-		close(file.write);
+		write(2, "USAGE: -e(encrypt)/-d(decrypt) \"passphrase\" \"file\"\n", 51);
+		return (1);
 	}
-	else
-		write(1, "USAGE: -e(encrypt)/-d(decrypt) \"passphrase\" \"file\"\n", 51);
+	output_name = parse_option(av[1], av[3]);
+	if (!output_name)
+	{
+		write(2, "Error: bad option or file extension for decryption\n", 51);
+		return (2);
+	}
+	open_files(&file, av, output_name);
+	printf("%s -> %s\n", av[3], output_name);
+	free(output_name);
+	gen_state(av[2], states);
+	if (encryption(&file, states))
+	{
+		write(2, "Error: reading or writing files error\n", 38);
+		return (3);
+	}
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/13 15:13:47 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/02/13 15:17:04 by fhenrion         ###   ########.fr       */
+/*   Updated: 2020/11/06 15:21:55 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,5 +24,6 @@
 # define LOAD "                                                            "
 
 void	ft_progress(size_t total);
+void	ft_progress_end(void);
 
 #endif
