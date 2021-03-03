@@ -20,7 +20,7 @@ static char	*add_extension(char *name)
 	len = strlen(name);
 	new = (char*)malloc(len + 4);
 	strcpy(new, name);
-	strlcpy(new + len, ".ca", 4);
+	strncpy(new + len, ".ca", 4);
 	return (new);
 }
 
@@ -33,7 +33,7 @@ static char	*remove_extension(char *name)
 	if (strncmp("ca", name + len, 2))
 		return (NULL);
 	new = (char*)malloc(len);
-	strlcpy(new, name, len);
+	strncpy(new, name, len);
 	return (new);
 }
 

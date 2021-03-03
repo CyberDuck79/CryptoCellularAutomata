@@ -106,6 +106,9 @@ static void	open_files(t_file *file, char **av, char *output_name)
 		exit(errno);
 	}
 	file->size = lseek(file->read, 0L, SEEK_END) / BUFFER_SIZE;
+	if (!file->size) {
+		file->size++;
+	}
 	lseek(file->read, 0L, SEEK_SET);
 }
 
