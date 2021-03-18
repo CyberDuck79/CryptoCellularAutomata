@@ -6,7 +6,7 @@
 #    By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/07 11:40:22 by fhenrion          #+#    #+#              #
-#    Updated: 2020/02/16 14:04:51 by fhenrion         ###   ########.fr        #
+#    Updated: 2021/03/18 15:31:53 by fhenrion         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,6 +23,10 @@ CFLAGS = -Werror -Wall -Wextra
 
 all: $(NAME)
 
+emulator: CAemulator.o
+	$(CC) $(CFLAGS) -I. $^ -o $@
+	@echo "\033[0;32mCompilation OK\033[0m"
+
 $(NAME): $(SRC_O)
 	$(CC) $(CFLAGS) -I. $^ -o $@
 	@echo "\033[0;32mCompilation OK\033[0m"
@@ -31,11 +35,11 @@ $(NAME): $(SRC_O)
 	$(CC) -c $(CFLAGS) -I. $< -o $@
 
 clean:
-	@/bin/rm -f $(SRC_O)
+	@/bin/rm -f $(SRC_O) CAemulator.o
 	@echo "\033[0;32mObjects files cleaning OK\033[0m"
 
 fclean: clean
-	@/bin/rm -f $(NAME)
+	@/bin/rm -f $(NAME) emulator
 	@echo "\033[0;32mLibrary cleaning OK\033[0m"
 
 re: fclean $(NAME)
