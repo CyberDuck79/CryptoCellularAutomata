@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2020/11/06 15:28:02 by fhenrion         ###   ########.fr       */
+/*   Updated: 2021/03/18 11:19:06 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@
 ** - Ways to improve randomness ?
 */
 
-/*
 static void write_state(ull	*state)
 {
 	static const char	square[6] = {0xe2, 0x96, 0x88, 0xe2, 0x96, 0x88};
@@ -31,7 +30,6 @@ static void write_state(ull	*state)
 			write(1, "  ", 2);
 	write(1, "\n", 1);
 }
-*/
 
 const uint8_t	rules[8] = {0x1E, 0x54, 0x5A, 0x65, 0x69, 0x96, 0x99, 0xA5};
 
@@ -47,7 +45,7 @@ static void encrypt_block(ull *block, ull *state, uint8_t rule_seq[ULL_SIZE])
 		rule_seq[i] = rules[0b111 & (st >> i)];
 	}
 	*block ^= *state;
-	//write_state(state); // -> output for tests
+	write_state(state); // -> output for tests
 }
 
 static void rule_seq_gen(ull states[STATE_NB], uint8_t rule_seq[STATE_NB][ULL_SIZE])
