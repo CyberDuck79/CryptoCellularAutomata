@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/18 13:31:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2021/03/19 13:23:27 by fhenrion         ###   ########.fr       */
+/*   Updated: 2021/03/21 10:21:36 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,23 +33,10 @@ static void write_state(uint64_t state) {
 
 static uint64_t generate(uint64_t state, uint16_t rule) {
 	uint64_t new_state = 0;
-	(void)rule;
-	static uint16_t rules[5] = {39318, 42390, 43350, 51510, 57630};
-	static int rule_i = 0;
+
 	for (uint64_t i = 0; i < 64; ++i) {
-		if (rules[rule_i] & B(0b1111 & ((state >> (i - 1)) | (state << (63 - i)) | (state << (64 - i))))) {
+		if (rule & B(0b1111 & ((state >> (i - 1)) | (state << (63 - i)) | (state << (64 - i))))) {
 			new_state |= B(i);
-		}
-	}
-	if (state % 2) {
-		++rule_i;
-		if (rule_i == 5) {
-			rule_i = 0;
-		}
-	} else {
-		--rule_i;
-		if (rule_i == -1) {
-			rule_i = 4;
 		}
 	}
 	return new_state;
