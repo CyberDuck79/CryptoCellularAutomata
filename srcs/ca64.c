@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/21 15:19:56 by fhenrion          #+#    #+#             */
-/*   Updated: 2021/03/21 15:40:44 by fhenrion         ###   ########.fr       */
+/*   Updated: 2021/03/21 20:38:57 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,6 @@ uint64_t generate(const uint64_t state, const int rule_i) {
 			new_state |= B(i);
 		}
 	}
-	write_state(state); // -> output for tests
+	//write_state(state); // -> output for tests
 	return new_state;
 }
