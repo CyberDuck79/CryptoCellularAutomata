@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/16 13:55:45 by fhenrion          #+#    #+#             */
-/*   Updated: 2021/03/21 15:54:49 by fhenrion         ###   ########.fr       */
+/*   Updated: 2021/03/21 20:19:54 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,26 @@ static const char *remove_extension(const char *name) {
 	}
 	new[len] = '\0';
 	return strncpy(new, name, len);
+}
+
+int check_nonce(const char *str) {
+	while (*str) {
+		if (*str < '0' || *str > '9') {
+			return -1;
+		}
+		++str;
+	}
+	return 0;
+}
+
+uint64_t get_nonce(const char *str) {
+	uint64_t nonce = 0;
+	while (*str) {
+		nonce *= 10;
+		nonce += *str - 48;
+		++str;
+	}
+	return nonce;
 }
 
 const char *output_filename(int option, const char *input_filename) {

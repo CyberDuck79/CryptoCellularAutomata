@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2021/03/21 15:43:23 by fhenrion         ###   ########.fr       */
+/*   Updated: 2021/03/21 20:29:13 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,21 +14,23 @@
 #include "../hdrs/args.h"
 #include "../hdrs/progress_bar.h"
 
-static int	encryption(file_t *file, uint64_t state, int rule_i) {
+static int	decryption(file_t *file, uint64_t state, int rule_i) {
 	uint64_t block[BLOCK_SIZE];
 	uint64_t prev_state;
 	ssize_t	read_size;
+	uint64_t prev_block;
 
-	for (int i = 0; i < 64; ++i) {
+	for (size_t i = 0; i < 64; ++i) {
 		prev_state = state;
 		state = generate(state, rule_i);
 		rule_i = shift_rule(prev_state, rule_i);
 	}
 	while ((read_size = read(file->read, block, BUFFER_SIZE)) > 0) {
-		for (int i = 0; i < read_size / 8; ++i) {
+		for (ssize_t i = 0; i < read_size / 8; ++i) {
 			prev_state = state;
-			state = generate(state, rule_i);
+			prev_block = block[i];
 			block[i] ^= state;
+			state = generate(prev_block, rule_i);
 			rule_i = shift_rule(prev_state, rule_i);
 		}
 		if (write(file->write, block, read_size) != read_size) {
@@ -40,7 +42,36 @@ static int	encryption(file_t *file, uint64_t state, int rule_i) {
 	ft_progress_end();
 	close(file->read);
 	close(file->write);
-	return (read_size < 0 ? 1 : 0);
+	return read_size < 0 ? 1 : 0;
+}
+
+static int	encryption(file_t *file, uint64_t state, int rule_i) {
+	uint64_t block[BLOCK_SIZE];
+	uint64_t prev_state;
+	ssize_t	read_size;
+
+	for (size_t i = 0; i < 64; ++i) {
+		prev_state = state;
+		state = generate(state, rule_i);
+		rule_i = shift_rule(prev_state, rule_i);
+	}
+	while ((read_size = read(file->read, block, BUFFER_SIZE)) > 0) {
+		for (ssize_t i = 0; i < read_size / 8; ++i) {
+			prev_state = state;
+			block[i] ^= state;
+			state = generate(block[i], rule_i);
+			rule_i = shift_rule(prev_state, rule_i);
+		}
+		if (write(file->write, block, read_size) != read_size) {
+			read_size = -1;
+			break;
+		}
+		ft_progress(file->size);
+	}
+	ft_progress_end();
+	close(file->read);
+	close(file->write);
+	return read_size < 0 ? 1 : 0;
 }
 
 static void	open_files(file_t *file, const char *input_name, const char *output_name) {
@@ -67,8 +98,8 @@ static void	open_files(file_t *file, const char *input_name, const char *output_
 }
 
 int main(int ac, char **av) {
-	if (ac != 4) {
-		write(1, "USAGE: -e(encrypt)/-d(decrypt) \"passphrase\" \"file\"\n", 51);
+	if (ac != 5) {
+		write(1, "USAGE: -e(encrypt)/-d(decrypt) \"passphrase\" file nonce\n", 55);
 		return 1;
 	}
 
@@ -82,24 +113,38 @@ int main(int ac, char **av) {
 			return 1;
 		}
 	}
-
+	
 	const char *output_name = output_filename(option_flag, av[3]);
 	if (!output_name) {
 		write(2, "Error: memory allocation\n", 25);
 		return 1;
 	}
+	
+	if (check_nonce(av[4])) {
+		write(2, "Error: invalid nonce\n", 21);
+		return 1;
+	}
+	const uint64_t seed_state = generate_hash(av[2]) ^ get_nonce(av[4]);
 
 	file_t file;
 	open_files(&file, av[3], output_name);
 	printf("%s -> %s\n", av[3], output_name);
 	free((void*)output_name);
-	
-	uint64_t seed_state = generate_hash(av[2]);
-	if (encryption(&file, seed_state, strlen(av[2]) % 5)) {
-		write(2, "Error: io files error\n", 22);
-		close(file.read);
-		close(file.write);
-		return 1;
+
+	if (option_flag) {
+		if (encryption(&file, seed_state, strlen(av[2]) % 5)) {
+			write(2, "Error: io files error\n", 22);
+			close(file.read);
+			close(file.write);
+			return 1;
+		}
+	} else {
+		if (decryption(&file, seed_state, strlen(av[2]) % 5)) {
+			write(2, "Error: io files error\n", 22);
+			close(file.read);
+			close(file.write);
+			return 1;
+		}
 	}
 	
 	return (0);
