@@ -1,14 +1,16 @@
 # CryptoCellularAutomata
-Elementary Cellular Automata Cryptography
+Cellular Automata Cryptography
 
 ## Description
-Model with 1D cellular automata, use the 8 radius=1 rules 30 / 86 / 90 / 101 / 105 / 150 / 153 / 165.  
-Use the hash SHA-256 of a passphrase as generation seed (start state of the CA).  
-Generate a 1024 rules sequence applying a 3 bits mask (0-7) through the start state.  
-Change the sequence at each new state generation depending on the previous state.  
-Use the generated states as XOR mask (disposable mask).  
+Cryptographic algorithm using a 1D cellular automata with radius 4.  
+The algorithm is inspired by "Random Sequence Generation by Cellular Automata" by Stephen Wolfram.
+It use a cellular automata to generate a pseudo random number generator and apply a Vernam cipher.
+The alogorithm is therefore symetric.
+To esure a good pseudo random generation the algorithm use hybrid CA, which means that 5 rules are alternately used to generate the CA states.
+These rules are taken for "Four Neighbourhood Cellular Automata asBetter Cryptographic Primitives" by Jimmy Jose and Dipanwita Roy Chowdhury.
+
 
 ## Usage
-compilation : simple make command  
+compilation : make
 arguments : -e(encrypt)/-d(decrypt) "passphrase" "file"  
 The encryption process create an encrypted .ca file, this is the file to use for decryption, with the same passphrase.  

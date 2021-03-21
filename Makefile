@@ -6,7 +6,7 @@
 #    By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/07 11:40:22 by fhenrion          #+#    #+#              #
-#    Updated: 2021/03/21 15:56:25 by fhenrion         ###   ########.fr        #
+#    Updated: 2021/03/21 15:58:43 by fhenrion         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -42,7 +42,7 @@ $(OBJ_FOLDER):
 	mkdir objs
 
 commit:
-	git add $(SRC_FOLDER) $(HDR_FOLDER) Makefile
+	git add $(SRC_FOLDER) $(HDR_FOLDER) Makefile README.md
 	git commit -m 'makefile_commit'
 	git push
 
