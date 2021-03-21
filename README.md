@@ -5,7 +5,7 @@ Cellular Automata Cryptography
 Cryptographic algorithm using a 1D cellular automata with radius 4.\
 The algorithm is inspired by "Random Sequence Generation by Cellular Automata" by Stephen Wolfram.\
 It use a cellular automata to generate a pseudo random number generator and apply a Vernam cipher in cipher feedback mode.\
-The alogorithm is therefore symetric.\
+The algorithm is therefore symmetrical.\
 To esure a good pseudo random generation the algorithm use hybrid CA, which means that 5 rules are alternately used to generate the CA states.\
 These rules are taken for "Four Neighbourhood Cellular Automata asBetter Cryptographic Primitives" by Jimmy Jose and Dipanwita Roy Chowdhury.
 
