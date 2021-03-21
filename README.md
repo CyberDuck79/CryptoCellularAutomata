@@ -16,4 +16,4 @@ The encryption process create an encrypted .ca file, this is the file to use for
 To ensure the security of the key (passphrase) use a different nonce on each encryption, the nonce can be send on insecure channel.
 
 ## TODO
-Adapt to network communication.\
+Adapt to network communication.
