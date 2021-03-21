@@ -6,7 +6,7 @@
 #    By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/07 11:40:22 by fhenrion          #+#    #+#              #
-#    Updated: 2021/03/21 15:58:43 by fhenrion         ###   ########.fr        #
+#    Updated: 2021/03/21 20:49:25 by fhenrion         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,6 +20,7 @@ OBJ = $(addsuffix .o,$(SRC_NAME))
 OBJ_FOLDER = objs/
 HDR = $(addsuffix .h,$(HDR_NAME))
 HDR_FOLDER = hdrs/
+DOC_FOLDER = doc/
 
 CC = gcc
 CFLAGS = -Werror -Wall -Wextra #-fsanitize=address
@@ -42,7 +43,7 @@ $(OBJ_FOLDER):
 	mkdir objs
 
 commit:
-	git add $(SRC_FOLDER) $(HDR_FOLDER) Makefile README.md
+	git add $(SRC_FOLDER) $(HDR_FOLDER) $(DOC_FOLDER) Makefile README.md
 	git commit -m 'makefile_commit'
 	git push
 
