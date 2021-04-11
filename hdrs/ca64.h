@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:09:21 by fhenrion          #+#    #+#             */
-/*   Updated: 2021/03/21 15:40:27 by fhenrion         ###   ########.fr       */
+/*   Updated: 2021/04/11 15:01:58 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ typedef struct	file_s {
 }	file_t;
 
 void		write_state(const uint64_t state);
-int			shift_rule(const uint64_t state, int rule_i);
 uint64_t	generate(const uint64_t state, const int rule_i);
 uint64_t	generate_hash(const char *passphrase);
 

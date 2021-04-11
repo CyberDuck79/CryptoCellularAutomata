@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 16:14:09 by fhenrion          #+#    #+#             */
-/*   Updated: 2021/03/21 20:29:13 by fhenrion         ###   ########.fr       */
+/*   Updated: 2021/04/11 15:02:56 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ static int	decryption(file_t *file, uint64_t state, int rule_i) {
 	for (size_t i = 0; i < 64; ++i) {
 		prev_state = state;
 		state = generate(state, rule_i);
-		rule_i = shift_rule(prev_state, rule_i);
+		rule_i = prev_state % 5;
 	}
 	while ((read_size = read(file->read, block, BUFFER_SIZE)) > 0) {
 		for (ssize_t i = 0; i < read_size / 8; ++i) {
@@ -31,7 +31,7 @@ static int	decryption(file_t *file, uint64_t state, int rule_i) {
 			prev_block = block[i];
 			block[i] ^= state;
 			state = generate(prev_block, rule_i);
-			rule_i = shift_rule(prev_state, rule_i);
+			rule_i = prev_state % 5;
 		}
 		if (write(file->write, block, read_size) != read_size) {
 			read_size = -1;
@@ -53,14 +53,14 @@ static int	encryption(file_t *file, uint64_t state, int rule_i) {
 	for (size_t i = 0; i < 64; ++i) {
 		prev_state = state;
 		state = generate(state, rule_i);
-		rule_i = shift_rule(prev_state, rule_i);
+		rule_i = prev_state % 5;
 	}
 	while ((read_size = read(file->read, block, BUFFER_SIZE)) > 0) {
 		for (ssize_t i = 0; i < read_size / 8; ++i) {
 			prev_state = state;
 			block[i] ^= state;
 			state = generate(block[i], rule_i);
-			rule_i = shift_rule(prev_state, rule_i);
+			rule_i = prev_state % 5;
 		}
 		if (write(file->write, block, read_size) != read_size) {
 			read_size = -1;

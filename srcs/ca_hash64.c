@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/19 14:27:19 by fhenrion          #+#    #+#             */
-/*   Updated: 2021/03/21 15:36:13 by fhenrion         ###   ########.fr       */
+/*   Updated: 2021/04/11 15:02:25 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ uint64_t generate_hash(const char *passphrase) {
 		for (size_t j = 0; j < 8; ++j) {
 			hash ^= generate(hash, rule_i);
 		}
-		rule_i = shift_rule(block, rule_i);
+		rule_i = block % 5;
 	}
 	if (padding) {
 		block = to_block_padding(passphrase, padding);

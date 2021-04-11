@@ -6,7 +6,7 @@
 /*   By: fhenrion <fhenrion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/21 15:19:56 by fhenrion          #+#    #+#             */
-/*   Updated: 2021/03/21 20:38:57 by fhenrion         ###   ########.fr       */
+/*   Updated: 2021/04/11 15:17:33 by fhenrion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,21 +25,6 @@ void write_state(const uint64_t state) {
 	write(1, "\n", 1);
 }
 
-int shift_rule(const uint64_t state, int rule_i) {
-	if (state % 2) {
-		++rule_i;
-		if (rule_i == 5) {
-			rule_i = 0;
-		}
-	} else {
-		--rule_i;
-		if (rule_i == -1) {
-			rule_i = 4;
-		}
-	}
-	return rule_i;
-}
-
 uint64_t generate(const uint64_t state, const int rule_i) {
 	static uint16_t rules[5] = {39318, 42390, 43350, 51510, 57630};
 	uint64_t new_state = 0;
@@ -49,6 +34,8 @@ uint64_t generate(const uint64_t state, const int rule_i) {
 			new_state |= B(i);
 		}
 	}
-	//write_state(state); // -> output for tests
+	#ifdef DEBUG
+		write_state(state); // -> output for tests
+	#endif
 	return new_state;
 }
