@@ -25,36 +25,35 @@ void write_state(const uint64_t state) {
 	write(1, "\n", 1);
 }
 
-	# Cryptographic algorithm using a 1D cellular automata with radius 4.
+	/* Cryptographic algorithm using a 1D cellular automata with radius 4. */
 
 uint64_t generate(const uint64_t state, const int rule_i) {
 	
-	# This algorithm takes as input an unsigned long long (uint64_t), 
-	# evolves it with cellular automata rules, and returns the modified uint64.
+	/* This algorithm takes as input an unsigned long long (uint64_t), 
+	evolves it with cellular automata rules, and returns the modified uint64. */
 	
-	# Five 1D radius 4 CA rules are alternately used to generate the CA states.
+	/* Five 1D radius 4 CA rules are alternately used to generate the CA states. */
 	static uint16_t rules[5] = {39318, 42390, 43350, 51510, 57630};
 	
 	uint64_t new_state = 0;
 	
-	# A for loop is used to fill in each bit of a uint64_t according to the cellular automata rule.
+	/* A for loop is used to fill in each bit of a uint64_t according to the cellular automata rule. */
 	
 	for (uint64_t i = 0; i < 64; ++i) {
 		
-	# Each rule is applied directly to the uint64_t using bitwise operations. The net effect of these
-	# operations on the particular bit will depend on the value of the rule itself.
+	/* Each rule is applied directly to the uint64_t using bitwise operations. The net effect of these
+	operations on the particular bit will depend on the value of the rule itself. */
 		
 		if (rules[rule_i] & B(0b1111 & ((state >> (i - 1)) | (state << (63 - i)) | (state << (64 - i))))) {
 			new_state |= B(i);
 			
-	# Goes through 64 bits of uint64_t and evolves them according to the rule.
+	/* Goes through 64 bits of uint64_t and evolves them according to the rule. */
 		}
-	# 
 	}
 	#ifdef DEBUG
 		write_state(state); // -> output for tests
 	#endif
 	return new_state;
-	# Note that the function returns a new uint64_t initialized within the function
-	# (memory was not allocated for this). 
+	/* Note that the function returns a new uint64_t initialized within the function
+	(memory was not allocated for this). */
 }
