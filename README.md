@@ -9,15 +9,21 @@ The algorithm is therefore symmetrical.\
 To esure a good pseudo random generation the algorithm use hybrid CA, which means that 5 rules are alternately used to generate the CA states.\
 These rules are taken for "Four Neighbourhood Cellular Automata asBetter Cryptographic Primitives" by Jimmy Jose and Dipanwita Roy Chowdhury.
 
-## README
+## README (with example tutorial by Andrew King)
 The program assumes GCC to compile programs by default. You should be able to run GNUMake by typing in 'make' on the terminal when the project's Makefile is in the present working directory. In this case, download and unzip the project, and type "make" in the terminal while in the same directory as the Makefile. When this works, you may notice some new files in the project subdirectories. To clean unnecessary object files from these folders, type "make clean".
 
 A text data file for testing the program in included under the filename "ode". To see its contents, type in 'cat ode' on the terminal. If everything's going well, there will be some John Keats poetry on your screen.
 
-Now, to encrypt the poem we will 
-arguments : -e(encrypt)/-d(decrypt) "passphrase" file nonce\
-The encryption process create an encrypted .ca file, this is the file to use for decryption, with the same passphrase and nonce.\
-To ensure the security of the key (passphrase) use a different nonce on each encryption, the nonce can be send on insecure channel.
+Now, to encrypt the poem we will type in:
 
-## TODO
-Adapt to network communication.
+./ca_crypt -e "password" "ode" nonce\
+
+on the terminal. You may use any password you like.
+Any integer or ASCII letter should suffice for a nonce.
+However, you will need to remember both, to decrypt.
+
+If the poem was encrypted successfully, typing 'cat ode.ca' on the terminal should display a hopelessly unreadable text of random ASCII letters. Fear not! Just decrypt the poem.
+
+./ca_crypt -d "password" "ode.ca" nonce\
+
+Typing the above into the terminal with the same password and nonce you used before will run the decryption operation on the ciphertext. If you followed this test without any errors, the program should have deciphered 'ode.ca' and overwritten the ciphertext file with a plaintext file 'ode'
