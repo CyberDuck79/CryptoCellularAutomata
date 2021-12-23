@@ -28,6 +28,6 @@ If the poem was encrypted successfully, typing 'cat ode.ca' on the terminal shou
 
 Typing the above into the terminal with the same password and nonce you used before will run the decryption operation on the ciphertext. If you followed this test without any errors, the program should have deciphered 'ode.ca' and overwritten the ciphertext file with a plaintext file 'ode'.
 
-/*  ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** */
+/*  ***** ***** ***** ***** ***** ***** */
 Hope Delaney and Andrew King were not the original authors of the C code; we have contributed notes in some of the source code and added an optional set of tutorial instructions to the README.
-/*  ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** */
+/*  ***** ***** ***** ***** ***** ***** */
