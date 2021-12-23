@@ -16,7 +16,7 @@ A text data file for testing the program in included under the filename "ode". T
 
 Now, to encrypt the poem we will type in:
 
-./ca_crypt -e "password" "ode" nonce\
+./ca_crypt -e "password" "ode" nonce
 
 on the terminal. You may use any password you like.
 Any integer or ASCII letter should suffice for a nonce.
@@ -24,6 +24,8 @@ However, you will need to remember both, to decrypt.
 
 If the poem was encrypted successfully, typing 'cat ode.ca' on the terminal should display a hopelessly unreadable text of random ASCII letters. Fear not! Just decrypt the poem.
 
-./ca_crypt -d "password" "ode.ca" nonce\
+./ca_crypt -d "password" "ode.ca" nonce
 
-Typing the above into the terminal with the same password and nonce you used before will run the decryption operation on the ciphertext. If you followed this test without any errors, the program should have deciphered 'ode.ca' and overwritten the ciphertext file with a plaintext file 'ode'
+Typing the above into the terminal with the same password and nonce you used before will run the decryption operation on the ciphertext. If you followed this test without any errors, the program should have deciphered 'ode.ca' and overwritten the ciphertext file with a plaintext file 'ode'.
+
+Hope Delaney and Andrew King were not the original authors of the C code; we have contributed notes in some of the source code and added an optional set of tutorial instructions to the README.
