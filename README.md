@@ -9,7 +9,7 @@ The algorithm is therefore symmetrical.\
 To esure a good pseudo random generation the algorithm use hybrid CA, which means that 5 rules are alternately used to generate the CA states.\
 These rules are taken for "Four Neighbourhood Cellular Automata asBetter Cryptographic Primitives" by Jimmy Jose and Dipanwita Roy Chowdhury.
 
-## README (with example tutorial by Andrew King)
+## README (with usage tutorial)
 The program assumes GCC to compile programs by default. You should be able to run GNUMake by typing in 'make' on the terminal when the project's Makefile is in the present working directory. In this case, download and unzip the project, and type "make" in the terminal while in the same directory as the Makefile. When this works, you may notice some new files in the project subdirectories. To clean unnecessary object files from these folders, type "make clean".
 
 A text data file for testing the program in included under the filename "ode". To see its contents, type in 'cat ode' on the terminal. If everything's going well, there will be some John Keats poetry on your screen.
