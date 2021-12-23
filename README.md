@@ -12,7 +12,7 @@ These rules are taken for "Four Neighbourhood Cellular Automata asBetter Cryptog
 ## README
 The program assumes GCC to compile programs by default. You should be able to run GNUMake by typing in 'make' on the terminal when the project's Makefile is in the present working directory. In this case, download and unzip the project, and type "make" in the terminal while in the same directory as the Makefile. When this works, you may notice some new files in the project subdirectories. To clean unnecessary object files from these folders, type "make clean".
 
-A file for testing the program included under the filename "ode" was not given a specific file type (text data file). To see its contents, type in 'cat ode' on the terminal. If everything's going well, there will be some John Keats poetry on your screen.
+A text data file for testing the program in included under the filename "ode". To see its contents, type in 'cat ode' on the terminal. If everything's going well, there will be some John Keats poetry on your screen.
 
 Now, to encrypt the poem we will 
 arguments : -e(encrypt)/-d(decrypt) "passphrase" file nonce\
